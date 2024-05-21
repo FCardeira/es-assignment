@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Checkbox, Label, Input, Button, Navbar, NavBrand } from 'flowbite-svelte';
+	import { Checkbox, Label, Input, Button} from 'flowbite-svelte';
     import lodash from 'lodash';
 	import BasicHeader from '../../components/basicHeader.svelte';
 
