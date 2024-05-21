@@ -83,7 +83,7 @@
 				<Select items={doctors} bind:value={formData.doctor} name="doctor" required />
 			</Label>
 			<Label class="space-y-2">
-				<span>Specialization</span>
+				<span>Speciality</span>
 				<Select
 					items={specializations}
 					bind:value={formData.speciality}
