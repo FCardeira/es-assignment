@@ -16,9 +16,15 @@
   $: disableSubmit = isNil(username) || isNil(password);
 </script>
 
-<Navbar fluid>
+<svelte:head>
+	<title>Login :: XPTO Clinic</title>
+	<meta name="description" content="Login page" />
+</svelte:head>
+
+<Navbar fluid slot="header">
 	<NavBrand href="/">
-		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">XPTO Clinic</span
+		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
+			>XPTO Clinic</span
 		>
 	</NavBrand>
 </Navbar>

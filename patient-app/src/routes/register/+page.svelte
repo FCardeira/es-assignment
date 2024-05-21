@@ -16,14 +16,19 @@
 
 </script>
 
-<Navbar fluid>
+<svelte:head>
+	<title>Register :: XPTO Clinic</title>
+	<meta name="description" content="Register page" />
+</svelte:head>
+
+<Navbar fluid slot="header">
 	<NavBrand href="/">
 		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
 			>XPTO Clinic</span
 		>
 	</NavBrand>
 </Navbar>
-<div class="flex items-center justify-center">
+<div class="flex items-center justify-center h-full">
 	<form class="flex flex-col space-y-4">
 		<h3 class="p-0 text-xl font-medium text-gray-900 dark:text-white">Create an account</h3>
 		<Label class="space-y-2">
