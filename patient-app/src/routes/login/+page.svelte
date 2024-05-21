@@ -1,12 +1,11 @@
 <script lang="ts">
 	import {
-		Navbar,
-		NavBrand,
 		Label,
 		Input,
 		Button
 	} from 'flowbite-svelte';
   import lodash from 'lodash';
+  import BasicHeader from '../../components/basicHeader.svelte';
 
   const { isNil } = lodash;
 
@@ -21,13 +20,7 @@
 	<meta name="description" content="Login page" />
 </svelte:head>
 
-<Navbar fluid slot="header">
-	<NavBrand href="/">
-		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
-			>XPTO Clinic</span
-		>
-	</NavBrand>
-</Navbar>
+<BasicHeader />
 <div class="flex h-full flex-col items-center justify-center">
 	<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
 		<form class="flex flex-col space-y-6">

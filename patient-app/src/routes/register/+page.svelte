@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Checkbox, Label, Input, Button, Navbar, NavBrand } from 'flowbite-svelte';
     import lodash from 'lodash';
+	import BasicHeader from '../../components/basicHeader.svelte';
 
     const { isNil } = lodash;
 
@@ -21,13 +22,7 @@
 	<meta name="description" content="Register page" />
 </svelte:head>
 
-<Navbar fluid slot="header">
-	<NavBrand href="/">
-		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
-			>XPTO Clinic</span
-		>
-	</NavBrand>
-</Navbar>
+<BasicHeader />
 <div class="flex items-center justify-center h-full">
 	<form class="flex flex-col space-y-4">
 		<h3 class="p-0 text-xl font-medium text-gray-900 dark:text-white">Create an account</h3>
