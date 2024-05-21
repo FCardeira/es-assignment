@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<Navbar fluid>
+	<NavBrand href="/">
+		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">XPTO Clinic</span
+		>
+	</NavBrand>
+</Navbar>
+<h1>Your appointments</h1>
+
+<script lang="ts">
+    import { Navbar, NavBrand } from 'flowbite-svelte';
+</script>
