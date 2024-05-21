@@ -2,11 +2,13 @@ import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
+from app.db.models import AppointmentModel, UserModel
 from app.requests import HTTP_POOL
 from app.logger import setup_logger
 from app.settings import settings
-from app.views import router
+from app import routes
 
 
 THREAD_POOL_WORKERS = 5
@@ -14,10 +16,10 @@ THREAD_POOL_WORKERS = 5
 
 async def startup_task():
     setup_logger()
-    
+
     if settings.IS_LOCAL and settings.DEBUG:
         print(settings)
-    
+
     loop = asyncio.get_event_loop()
     loop.set_default_executor(ThreadPoolExecutor(max_workers=THREAD_POOL_WORKERS))
 
@@ -46,7 +48,9 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(router)
+    app.include_router(routes.base_router)
+    app.include_router(routes.appointments_router)
+    app.include_router(routes.auth_router)
 
     return app
 
