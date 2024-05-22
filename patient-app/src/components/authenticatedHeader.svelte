@@ -4,6 +4,8 @@
     import { page } from '$app/stores';
 
     $: activeUrl = $page.url.pathname;
+
+	export let hideNewApponintmentButton = false;
 </script>
 
 <Navbar fluid slot="header">
@@ -14,10 +16,12 @@
 	</NavBrand>
 	<div class="flex md:order-2 space-x-2">
 		<NavHamburger />
-		<Button pill size="xs" class="my-2">
+		{#if !hideNewApponintmentButton}
+		<Button pill size="xs" class="my-2" href="/appointments/create">
 			<CalendarEditOutline />
 			<span class="ml-2">New appointment</span>
 		</Button>
+		{/if}
 		<DarkMode />
 	</div>
 	<NavUl {activeUrl} class="order-1 justify-end">
