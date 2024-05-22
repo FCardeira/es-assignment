@@ -7,12 +7,13 @@ class Settings(BaseSettings):
     DEBUG: bool | None = False
     
     CORS_ALLOWED: list[str] | None = ["*"]
-    DYNAMO_DB_PATH: str
-    POSTGRES_DB_PATH: str
+    # DYNAMO_DB_PATH: str
+    # POSTGRES_DB_PATH: str
     
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: str
     AWS_REGION_NAME: str | None = "eu-west-1"
+    AWS_SESSION_TOKEN: str
     
 
     class Config:

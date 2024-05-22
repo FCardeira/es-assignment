@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-from app.db.models import AppointmentModel, UserModel
 from app.requests import HTTP_POOL
 from app.logger import setup_logger
 from app.settings import settings
@@ -49,8 +48,10 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(routes.base_router)
-    app.include_router(routes.appointments_router)
     app.include_router(routes.auth_router)
+    app.include_router(routes.appointments_router)
+    app.include_router(routes.manager_appointments_router)
+    app.include_router(routes.payment_router)
 
     return app
 

@@ -1,10 +1,17 @@
 from fastapi import APIRouter, status
 
-from app.routes.appointments import router as appointments_router
 from app.routes.auth import router as auth_router
+from app.routes.appointments import router as appointments_router
+from app.routes.appointments import manager_router as manager_appointments_router
+from app.routes.payment import router as payment_router
+
 
 appointments_router = appointments_router
+manager_appointments_router = manager_appointments_router
+
 auth_router = auth_router
+
+payment_router = payment_router
 
 
 base_router = APIRouter()

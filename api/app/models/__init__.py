@@ -1,16 +1,16 @@
 from pydantic import EmailStr, BaseModel
+from datetime import datetime
 
 
 class UserCreate(BaseModel):
     username: str
     password: str
     email: EmailStr
+    phone_number: str
 
 
 class UserRead(BaseModel):
-    id: int
     username: str
-    email: EmailStr
     password: str
 
 
@@ -19,5 +19,25 @@ class Token(BaseModel):
     token_type: str
 
 
-class TokenData(BaseModel):
-    username: str | None = None
+class UserCreateResponse(BaseModel):
+    username: str
+    email: str
+    phone_number: str
+
+
+class LoginResponse(BaseModel):
+    user: UserCreateResponse
+    token: str
+    exp: datetime | None
+
+
+class DBUser(BaseModel):
+    username: str
+    password: str
+    email: str
+    phone_number: str
+    exp: int | None = None  # expiration date
+
+
+class AppointmentCreate(BaseModel):
+    pass
