@@ -1,0 +1,115 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Get appointment",
+    "States": {
+      "Get appointment": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "Parameters": {
+          "FunctionName": "arn:aws:lambda:us-east-1:417468844144:function:GetAppointmentsRDS:$LATEST",
+          "Payload": {
+            "doctor.$": "$.doctor",
+            "date.$": "$.date",
+            "time.$": "$.time"
+          }
+        },
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 1,
+            "MaxAttempts": 3,
+            "BackoffRate": 2
+          }
+        ],
+        "Next": "Choice",
+        "ResultPath": "$.result"
+      },
+      "Choice": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "And": [
+              {
+                "Variable": "$.result.Payload.body",
+                "StringMatches": "[]"
+              },
+              {
+                "Variable": "$.result.Payload.statusCode",
+                "NumericEquals": 200
+              }
+            ],
+            "Next": "Create appointment RDS"
+          }
+        ],
+        "Default": "Fail"
+      },
+      "Create appointment RDS": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "Parameters": {
+          "Payload.$": "$",
+          "FunctionName": "arn:aws:lambda:us-east-1:417468844144:function:CreateAppointmentsRDS:$LATEST"
+        },
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 1,
+            "MaxAttempts": 3,
+            "BackoffRate": 2
+          }
+        ],
+        "Next": "Create appointment state",
+        "ResultSelector": {
+          "appointment.$": "$.Payload.body"
+        }
+      },
+      "Create appointment state": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:putItem",
+        "Parameters": {
+          "TableName": "AppointmentsState",
+          "Item": {
+            "Id": {
+              "N.$": "States.Format('{}', $.appointment.appointment_id)"
+            },
+            "State": {
+              "S": "Waiting for payment"
+            }
+          }
+        },
+        "Next": "Start payment check",
+        "ResultPath": "$.result",
+        "OutputPath": "$.appointment"
+      },
+      "Start payment check": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::states:startExecution",
+        "Parameters": {
+          "StateMachineArn": "arn:aws:states:us-east-1:417468844144:stateMachine:HoldAppointment",
+          "Input": {
+            "appointment_id.$": "$.appointment_id"
+          }
+        },
+        "Next": "Success",
+        "ResultPath": "$.result"
+      },
+      "Fail": {
+        "Type": "Fail",
+        "Error": "AppointmentAlreadyExists",
+        "Cause": "There already exists an appointment for that doctor in that date"
+      },
+      "Success": {
+        "Type": "Succeed"
+      }
+    }
+  }

@@ -1,0 +1,61 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Get appointment",
+    "States": {
+      "Get appointment": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:getItem",
+        "Parameters": {
+          "TableName": "AppointmentsState",
+          "Key": {
+            "Id": {
+              "N.$": "States.Format('{}', $.appointment_id)"
+            }
+          }
+        },
+        "Next": "Found item?",
+        "ResultPath": "$.appointmentState"
+      },
+      "Found item?": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.appointmentState.Item",
+            "IsPresent": true,
+            "Next": "Update state"
+          }
+        ],
+        "Default": "Fail"
+      },
+      "Update state": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:updateItem",
+        "Parameters": {
+          "TableName": "AppointmentsState",
+          "Key": {
+            "Id": {
+              "N.$": "States.Format('{}', $.appointment_id)"
+            }
+          },
+          "UpdateExpression": "SET #S = :newState",
+          "ExpressionAttributeNames": {
+            "#S": "State"
+          },
+          "ExpressionAttributeValues": {
+            ":newState": {
+              "S.$": "$.new_state"
+            }
+          }
+        },
+        "Next": "Success"
+      },
+      "Success": {
+        "Type": "Succeed"
+      },
+      "Fail": {
+        "Type": "Fail",
+        "Error": "AppointmentNotFound",
+        "Cause": "Appointment not found"
+      }
+    }
+  }

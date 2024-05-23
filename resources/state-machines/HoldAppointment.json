@@ -1,0 +1,109 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Wait 5 minutes",
+    "States": {
+      "Wait 5 minutes": {
+        "Type": "Wait",
+        "Seconds": 300,
+        "Next": "DynamoDB GetItem"
+      },
+      "DynamoDB GetItem": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:getItem",
+        "Parameters": {
+          "TableName": "AppointmentsState",
+          "Key": {
+            "Id": {
+              "N.$": "States.Format('{}', $.appointment_id)"
+            }
+          }
+        },
+        "Next": "Found item?"
+      },
+      "Found item?": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.Item",
+            "IsPresent": true,
+            "Next": "Is still waiting for payment?"
+          }
+        ],
+        "OutputPath": "$.Item",
+        "Default": "NotFound"
+      },
+      "Is still waiting for payment?": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.State.S",
+            "StringMatches": "Waiting for payment",
+            "Next": "Parallel"
+          }
+        ],
+        "Default": "Already Paid"
+      },
+      "Parallel": {
+        "Type": "Parallel",
+        "Branches": [
+          {
+            "StartAt": "Delete appointment",
+            "States": {
+              "Delete appointment": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "OutputPath": "$.Payload",
+                "Parameters": {
+                  "FunctionName": "arn:aws:lambda:us-east-1:417468844144:function:DeleteAppointment:$LATEST",
+                  "Payload": {
+                    "appointment_id.$": "$.Id.N"
+                  }
+                },
+                "Retry": [
+                  {
+                    "ErrorEquals": [
+                      "Lambda.ServiceException",
+                      "Lambda.AWSLambdaException",
+                      "Lambda.SdkClientException",
+                      "Lambda.TooManyRequestsException"
+                    ],
+                    "IntervalSeconds": 1,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 2
+                  }
+                ],
+                "End": true
+              }
+            }
+          },
+          {
+            "StartAt": "Delete appointment state",
+            "States": {
+              "Delete appointment state": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::dynamodb:deleteItem",
+                "Parameters": {
+                  "TableName": "AppointmentsState",
+                  "Key": {
+                    "Id": {
+                      "N.$": "States.Format('{}', $.Id.N)"
+                    }
+                  }
+                },
+                "End": true
+              }
+            }
+          }
+        ],
+        "End": true
+      },
+      "Already Paid": {
+        "Type": "Succeed"
+      },
+      "NotFound": {
+        "Type": "Fail",
+        "Error": "NotFound",
+        "Cause": "Appointment State Not Found"
+      }
+    }
+  }

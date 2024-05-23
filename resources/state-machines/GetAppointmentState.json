@@ -1,0 +1,43 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Get appointment",
+    "States": {
+      "Get appointment": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:getItem",
+        "Parameters": {
+          "TableName": "AppointmentsState",
+          "Key": {
+            "Id": {
+              "N.$": "States.Format('{}', $.appointment_id)"
+            }
+          }
+        },
+        "Next": "Found?"
+      },
+      "Found?": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.Item",
+            "IsPresent": true,
+            "Next": "Pass"
+          }
+        ],
+        "Default": "Fail"
+      },
+      "Pass": {
+        "Type": "Pass",
+        "Next": "Success",
+        "OutputPath": "$.Item.State.S"
+      },
+      "Success": {
+        "Type": "Succeed"
+      },
+      "Fail": {
+        "Type": "Fail",
+        "Error": "AppointmentNotFound",
+        "Cause": "An appointment with the past id has not been found"
+      }
+    }
+  }
