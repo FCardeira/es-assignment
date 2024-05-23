@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { PUBLIC_API_URL } from '$env/static/public';
 
-axios.defaults.baseURL = 'http://localhost:9001';
+axios.defaults.baseURL = PUBLIC_API_URL;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 axios.interceptors.request.use((config) => {
