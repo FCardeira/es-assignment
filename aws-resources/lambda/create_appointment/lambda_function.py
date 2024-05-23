@@ -1,64 +1,99 @@
 import json
 import pymysql
+import boto3
+from datetime import datetime
+import botocore.session
 
 # Configuration values
 rds_host = "es-clinic.cptjijpjcdzx.us-east-1.rds.amazonaws.com"
 rds_user = "admin"
 rds_password = "W3kUFrKIThZLo7Q8Rsz5"
 rds_db_name = "esclinic"
+dynamodb_table_name = "AppointmentsState"
+dynamodb_region = "us-east-1"
+
 
 def lambda_handler(event, context):
-    
+    appointment_id = event.get('appointment_id')
+    patient_username = event.get('username')
+    doctor = event.get('doctor')
+    appointment_date = event.get('date')  # Expected format: dd/MM/yyyy
+    appointment_time = event.get('time')  # Expected format: HH:mm
+
     try:
-        # Connect to MySQL server
-        connection = pymysql.connect(host=rds_host, user=rds_user, password=rds_password, database=rds_db_name)
+        # Combine date and time into a single datetime object if both are provided
+        if appointment_date and appointment_time:
+            combined_datetime = datetime.strptime(f"{appointment_date} {appointment_time}", "%d/%m/%Y %H:%M")
+        else:
+            combined_datetime = None
+
+        # Establish a connection to the RDS instance
+        connection = pymysql.connect(
+            host=rds_host,
+            user=rds_user,
+            password=rds_password,
+            database=rds_db_name
+        )
+
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+        # Start building the SQL query
+        sql = "SELECT id as 'appointment_id', patient_username, doctor, speciality, DATE(date) as 'date', TIME(date) as 'time' FROM APPOINTMENTS"
+        conditions = []
+        parameters = []
+
+        # Add conditions based on provided parameters
+        if appointment_id:
+            conditions.append("id = %s")
+            parameters.append(appointment_id)
+        if patient_username:
+            conditions.append("patient_username = %s")
+            parameters.append(patient_username)
+        if doctor:
+            conditions.append("doctor = %s")
+            parameters.append(doctor)
+        if combined_datetime:
+            conditions.append("date = %s")
+            parameters.append(combined_datetime)
+        if appointment_date:
+            if appointment_time:
+                # Querying by both date and time
+                conditions.append("date = %s")
+                parameters.append(combined_datetime)
+            else:
+                # Querying by date only
+                conditions.append("DATE(date) = %s")
+                parameters.append(datetime.strptime(appointment_date, "%d/%m/%Y").date())
+
+        # Combine the conditions with AND operator if there are any
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
         
-        # Get payload from the event
-        patient_username = event.get("patient_username")
-        doctor = event.get("doctor")
-        speciality = event.get("speciality")
-        date = event.get("date")
-        time = event.get("time")
+        print("Before execute")
+        cursor.execute(sql, parameters)
+        print("After execute")
 
-
-        # Create a cursor object
-        cursor = connection.cursor()
-
-        # Query to insert a new appointment with sql injection protection
-        insert_query = "INSERT INTO APPOINTMENTS (patient_username, doctor, speciality, date) VALUES (%s, %s, %s, %s);"
-
-        # Execute the query
-        cursor.execute(insert_query, (patient_username, doctor, speciality, date))
+        # Fetch all results
+        result = cursor.fetchall()
+        print("Fetched?")
+        print(result)
         
-        # Commit the transaction
-        connection.commit();
+        for appointment in result:
+            date_str = appointment['date'].strftime("%d/%m/%Y")
+            time_str = (datetime.min + appointment['time']).strftime("%H:%M")
+            appointment['date'] = date_str
+            appointment['time'] = time_str
 
-        # Get the last inserted id
-        appointment_id = cursor.lastrowid
-        
-        # Return the response
-        response = {
-            "statusCode": 200,
-            "body": json.dumps({
-                "appointment_id": appointment_id,
-                "patient_username": patient_username,
-                "doctor": doctor,
-                "speciality": speciality,
-                "date": date,
-                "time": time
-            })
-        }
-
-    except pymysql.Error as e:
-        # Return the response
-        response = {
-            "statusCode": 500,
-            "body": json.dumps(str(e))
-        }
-
-    finally:
-        # Close cursor and connection
+        # Close the connection
         cursor.close()
         connection.close()
 
-    return response
+        return {
+            'statusCode': 200,
+            'body': json.dumps(result)
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': str(e)
+        }
