@@ -1,77 +1,77 @@
 {
-    "Comment": "A description of my state machine",
-    "StartAt": "Check",
-    "States": {
-      "Check": {
-        "Type": "Task",
-        "Resource": "arn:aws:states:::dynamodb:getItem",
-        "Parameters": {
-          "TableName": "users",
-          "Key": {
-            "id": {
-              "S.$": "$.username"
-            }
+  "Comment": "A description of my state machine",
+  "StartAt": "Get user",
+  "States": {
+    "Get user": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:getItem",
+      "Parameters": {
+        "TableName": "users",
+        "Key": {
+          "id": {
+            "S.$": "$.username"
           }
-        },
-        "Next": "Choice",
-        "ResultPath": "$.input"
-      },
-      "Choice": {
-        "Type": "Choice",
-        "Choices": [
-          {
-            "Variable": "$.input.Item",
-            "IsPresent": true,
-            "Next": "User already exists"
-          }
-        ],
-        "Default": "DynamoDB PutItem"
-      },
-      "User already exists": {
-        "Type": "Fail",
-        "Error": "UsernameAlreadyExists"
-      },
-      "DynamoDB PutItem": {
-        "Type": "Task",
-        "Resource": "arn:aws:states:::dynamodb:putItem",
-        "Parameters": {
-          "TableName": "users",
-          "Item": {
-            "id": {
-              "S.$": "$.username"
-            },
-            "password": {
-              "S.$": "$.password"
-            },
-            "email": {
-              "S.$": "$.email"
-            },
-            "phone_number": {
-              "S.$": "$.phone_number"
-            }
-          }
-        },
-        "Next": "Get",
-        "ResultPath": "$.context"
-      },
-      "Get": {
-        "Type": "Task",
-        "Resource": "arn:aws:states:::dynamodb:getItem",
-        "Parameters": {
-          "TableName": "users",
-          "Key": {
-            "id": {
-              "S.$": "$.username"
-            }
-          }
-        },
-        "End": true,
-        "ResultSelector": {
-          "username.$": "$.Item.id.S",
-          "password.$": "$.Item.password.S",
-          "email.$": "$.Item.email.S",
-          "phone_number.$": "$.Item.phone_number.S"
         }
+      },
+      "Next": "Found an user?",
+      "ResultPath": "$.input"
+    },
+    "Found an user?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.input.Item",
+          "IsPresent": true,
+          "Next": "User already exists"
+        }
+      ],
+      "Default": "Insert new user"
+    },
+    "User already exists": {
+      "Type": "Fail",
+      "Error": "UsernameAlreadyExists"
+    },
+    "Insert new user": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:putItem",
+      "Parameters": {
+        "TableName": "users",
+        "Item": {
+          "id": {
+            "S.$": "$.username"
+          },
+          "password": {
+            "S.$": "$.password"
+          },
+          "email": {
+            "S.$": "$.email"
+          },
+          "phone_number": {
+            "S.$": "$.phone_number"
+          }
+        }
+      },
+      "Next": "Get created user",
+      "ResultPath": "$.context"
+    },
+    "Get created user": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:getItem",
+      "Parameters": {
+        "TableName": "users",
+        "Key": {
+          "id": {
+            "S.$": "$.username"
+          }
+        }
+      },
+      "End": true,
+      "ResultSelector": {
+        "username.$": "$.Item.id.S",
+        "password.$": "$.Item.password.S",
+        "email.$": "$.Item.email.S",
+        "phone_number.$": "$.Item.phone_number.S"
       }
     }
   }
+}

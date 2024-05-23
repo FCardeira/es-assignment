@@ -1,43 +1,43 @@
 {
-    "Comment": "A description of my state machine",
-    "StartAt": "DynamoDB GetItem",
-    "States": {
-      "DynamoDB GetItem": {
-        "Type": "Task",
-        "Resource": "arn:aws:states:::dynamodb:getItem",
-        "Parameters": {
-          "TableName": "users",
-          "Key": {
-            "id": {
-              "S.$": "$.username"
-            }
+  "Comment": "A description of my state machine",
+  "StartAt": "Get user",
+  "States": {
+    "Get user": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:getItem",
+      "Parameters": {
+        "TableName": "users",
+        "Key": {
+          "id": {
+            "S.$": "$.username"
           }
-        },
-        "Next": "Choice",
-        "ResultSelector": {
-          "username.$": "$.Item.id.S",
-          "password.$": "$.Item.password.S",
-          "email.$": "$.Item.email.S",
-          "phone_number.$": "$.Item.phone_number.S"
         }
       },
-      "Choice": {
-        "Type": "Choice",
-        "Choices": [
-          {
-            "Variable": "$.username",
-            "IsPresent": true,
-            "Next": "Success"
-          }
-        ],
-        "Default": "Fail"
-      },
-      "Success": {
-        "Type": "Succeed"
-      },
-      "Fail": {
-        "Type": "Fail",
-        "Error": "UsernameNotFound"
+      "Next": "Found?",
+      "ResultSelector": {
+        "username.$": "$.Item.id.S",
+        "password.$": "$.Item.password.S",
+        "email.$": "$.Item.email.S",
+        "phone_number.$": "$.Item.phone_number.S"
       }
+    },
+    "Found?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.username",
+          "IsPresent": true,
+          "Next": "Success"
+        }
+      ],
+      "Default": "Fail"
+    },
+    "Success": {
+      "Type": "Succeed"
+    },
+    "Fail": {
+      "Type": "Fail",
+      "Error": "UsernameNotFound"
     }
   }
+}

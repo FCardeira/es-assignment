@@ -39,7 +39,7 @@ async def call_step_function(arn: str, params: dict):
 
 async def get_user_dynamodb(username: str) -> DBUser:
     output = await call_step_function(
-        "arn:aws:states:us-east-1:431099602872:stateMachine:getUser",
+        settings.GET_USER_ARN,
         {"username": username},
     )
     return DBUser(**output)

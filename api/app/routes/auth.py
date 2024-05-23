@@ -26,7 +26,7 @@ client = boto3.client(
 @router.post("/register")
 async def register_user(user: UserCreate) -> UserCreateResponse:
     output = await call_step_function(
-        "arn:aws:states:us-east-1:431099602872:stateMachine:userRegister",
+        settings.REGISTER_USER_ARN,
         {
             "username": user.username,
             "password": user.password,

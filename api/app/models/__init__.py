@@ -40,4 +40,15 @@ class DBUser(BaseModel):
 
 
 class AppointmentCreate(BaseModel):
-    pass
+    doctor: str
+    date: str
+    time: str
+    speciality: str
+
+class Appointment(BaseModel):
+    appointment_id: str
+    doctor: str
+    date: str
+    time: str
+    speciality: str
+    state: str | None = None

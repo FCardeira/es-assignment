@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str
     AWS_REGION_NAME: str | None = "eu-west-1"
     AWS_SESSION_TOKEN: str
+
+    REGISTER_USER_ARN: str
+    GET_USER_ARN: str
+    UPDATE_APPOINTMENT_STATE_ARN: str
+    SCHEDULE_APPOINTMENT_ARN: str
+    GET_APPOINTMENTS_ARN: str
+    GET_APPOINTMENT_STATE_ARN: str
     
 
     class Config:
