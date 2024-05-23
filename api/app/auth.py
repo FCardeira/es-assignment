@@ -15,7 +15,7 @@ from app.models import DBUser
 
 SECRET_KEY = "es_very_secret_key_2024"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 300
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

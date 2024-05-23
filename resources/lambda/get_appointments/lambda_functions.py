@@ -1,8 +1,6 @@
 import json
 import pymysql
-import boto3
 from datetime import datetime
-import botocore.session
 
 # Configuration values
 rds_host = "es-clinic.cptjijpjcdzx.us-east-1.rds.amazonaws.com"

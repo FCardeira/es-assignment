@@ -6,6 +6,11 @@
 	} from 'flowbite-svelte';
   import lodash from 'lodash';
   import BasicHeader from '../../components/basicHeader.svelte';
+  import { type AxiosResponse } from 'axios';
+  import axios from '../../boot/axios';
+  import { addAlert } from '../../components/alerts/store';
+  import { goto } from '$app/navigation';
+  import { saveToken } from '$lib/auth';
 
   const { isNil } = lodash;
 
@@ -13,6 +18,26 @@
   let password: string;
 
   $: disableSubmit = isNil(username) || isNil(password);
+
+  async function signIn(event: Event) {
+	event.preventDefault();
+	if (disableSubmit) return;
+	try {
+		const response = await axios.post<{ username: string, password: string}, AxiosResponse<{ token: string }>>('/auth/login', { username, password })
+		addAlert({
+			color: 'green',
+			message: 'Logged in successfully.'
+		});
+		saveToken(response.data.token);
+		goto('/appointments');
+	} catch (e) {
+		addAlert({
+			color: 'red',
+			message: 'An error occurred while trying to log in. Please try again later.'
+		});
+	}
+  }
+
 </script>
 
 <svelte:head>
@@ -33,7 +58,7 @@
 				<span>Your password</span>
 				<Input type="password" name="password" placeholder="•••••" required bind:value={password} />
 			</Label>
-			<Button type="submit" class="w-full1" bind:disabled={disableSubmit}>Sign in</Button>
+			<Button class="w-full1" bind:disabled={disableSubmit} on:click={signIn}>Sign in</Button>
 			<p class="text-sm font-light text-gray-500 dark:text-gray-400">
 				Don't have an account yet? <a
 					href="/register"
