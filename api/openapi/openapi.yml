@@ -30,7 +30,7 @@ paths:
     post:
       tags:
         - Authtentication
-      summary: Register User
+      summary: Endpoint for user registration
       operationId: register_user_auth_register_post
       requestBody:
         content:
@@ -55,7 +55,7 @@ paths:
     post:
       tags:
         - Authtentication
-      summary: Login
+      summary: Endpoint for user login
       operationId: login_auth_login_post
       requestBody:
         content:
@@ -80,7 +80,7 @@ paths:
     get:
       tags:
         - Authtentication
-      summary: Get User
+      summary: Get User account info
       operationId: get_user_auth_me_get
       responses:
         '200':
@@ -95,7 +95,7 @@ paths:
     get:
       tags:
         - Appointments
-      summary: Get User Appointments
+      summary: Get appointments for the user
       operationId: get_user_appointments_appointments_user_get
       responses:
         '200':
@@ -112,7 +112,7 @@ paths:
     get:
       tags:
         - Appointments
-      summary: Get Appointment State
+      summary: Get the state of a specific appointment
       operationId: get_appointment_state_appointments__appointment_id__state_get
       parameters:
         - name: appointment_id
@@ -141,7 +141,7 @@ paths:
     post:
       tags:
         - Appointments
-      summary: Create Appointments
+      summary: Schedule a new appointment with a "Waiting for payment" state
       operationId: create_appointments_appointments__post
       requestBody:
         content:
@@ -168,7 +168,7 @@ paths:
     get:
       tags:
         - Appointments
-      summary: Get Occupied Slots
+      summary: Get occupied slots for the appointments
       operationId: get_occupied_slots_appointments_slots_get
       security:
         - OAuth2PasswordBearer: []
@@ -204,7 +204,7 @@ paths:
     put:
       tags:
         - Appointments
-      summary: Pay Appointment
+      summary: Pay a specific appointment
       operationId: pay_appointment_appointments__appointment_id__pay_put
       security:
         - OAuth2PasswordBearer: []
@@ -231,7 +231,7 @@ paths:
     get:
       tags:
         - Appointments
-      summary: Get Appointment
+      summary: Get information for a specific appointment
       operationId: get_appointment_appointments__appointment_id__get
       security:
         - OAuth2PasswordBearer: []
@@ -259,7 +259,7 @@ paths:
     get:
       tags:
         - Manager Appointments
-      summary: Manager Get Appointments
+      summary: Get all appointments from all users
       operationId: manager_get_appointments_manager_appointments__get
       responses:
         '200':
@@ -274,7 +274,7 @@ paths:
     put:
       tags:
         - Manager Appointments
-      summary: Finish Appointment
+      summary: Change the state of an appointment to finished
       operationId: finish_appointment_manager_appointments__appointment_id__finish_put
       parameters:
         - name: appointment_id
@@ -295,25 +295,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /appointments/{appointment_id}/payments/:
-    put:
-      tags:
-        - Payments
-      summary: Pay Appointment
-      operationId: pay_appointment_appointments__appointment_id__payments__put
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                items: {}
-                type: array
-                title: >-
-                  Response Pay Appointment Appointments  Appointment Id 
-                  Payments  Put
-      security:
-        - OAuth2PasswordBearer: []
 components:
   schemas:
     Appointment:
