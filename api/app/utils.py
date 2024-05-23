@@ -6,15 +6,22 @@ from fastapi import HTTPException
 from settings import settings
 from models import DBUser
 
-
-client = boto3.client(
-    service_name="stepfunctions",
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=settings.AWS_REGION_NAME,
-    aws_session_token=settings.AWS_SESSION_TOKEN,
-    use_ssl=True,
-)
+# if is in development mode pass keys, else don't
+if settings.IS_LOCAL:
+    client = boto3.client(
+        service_name="stepfunctions",
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_REGION_NAME,
+        aws_session_token=settings.AWS_SESSION_TOKEN,
+        use_ssl=True,
+    )
+else:
+    client = boto3.client(
+        service_name="stepfunctions",
+        region_name=settings.AWS_REGION_NAME,
+        use_ssl=True,
+    )
 
 
 async def call_step_function(arn: str, params: dict):
