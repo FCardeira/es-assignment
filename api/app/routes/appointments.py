@@ -4,7 +4,7 @@ from fastapi.params import Depends
 import json
 
 from app.utils import call_step_function
-from app.models import AppointmentCreate, DBUser, Appointment
+from app.models import AppointmentCreate, DBUser, Appointment, Slot
 from app.auth import get_current_user
 from app.settings import settings
 
@@ -21,15 +21,16 @@ async def get_user_appointments(user: DBUser = Depends(get_current_user)) -> lis
         settings.GET_APPOINTMENTS_ARN,
         {"username": user.username},
     )
-    breakpoint()
-
     appointments = json.loads(output["body"])
 
+    for appointment in appointments:
+        appointment["state"] = await get_appointment_state(appointment["appointment_id"])
 
-    return [AppointmentCreate(**item) for item in appointments]
+    return [Appointment(**item) for item in appointments]
 
 @router.get("/{appointment_id}/state")
-async def get_appointment_state(appointment_id: int) -> str:
+async def get_appointment_state(appointment_id: str) -> str:
+    appointment_id = int(appointment_id)
     output = await call_step_function(
         settings.GET_APPOINTMENT_STATE_ARN,
         {"appointment_id": appointment_id},
@@ -54,11 +55,15 @@ async def create_appointments(
 
     return Appointment(appointment_id=str(output["appointment_id"]), doctor=output["doctor"], date=output["date"], time=output["time"], speciality=output["speciality"], state="Waiting for payment")
 
+@router.get("/slots")
+async def get_occupied_slots(date: str, doctor: str, user: DBUser = Depends(get_current_user)) -> list:
+    output = await call_step_function(
+        settings.GET_APPOINTMENTS_ARN,
+        {"date": date, "doctor": doctor},
+    )
+    appointments = json.loads(output["body"])
 
-@router.get("/")
-async def get_all_appointments(user: DBUser = Depends(get_current_user)) -> list:
-    # TODO: Get appointments from the database
-    return []
+    return [Slot(date=appointment["date"], time=appointment["time"], doctor=appointment["doctor"]) for appointment in appointments]
 
 @router.put("/{appointment_id}/pay")
 async def pay_appointment(appointment_id: int, user: DBUser = Depends(get_current_user)
@@ -68,9 +73,21 @@ async def pay_appointment(appointment_id: int, user: DBUser = Depends(get_curren
         settings.UPDATE_APPOINTMENT_STATE_ARN,
         {
             "appointment_id": appointment_id,
-            "state": "Confirmed"
+            "new_state": "Confirmed"
         }
     )
+
+@router.get("/{appointment_id}")
+async def get_appointment(appointment_id: int, user: DBUser = Depends(get_current_user)) -> Appointment:
+    output = await call_step_function(
+        settings.GET_APPOINTMENTS_ARN,
+        {"appointment_id": appointment_id},
+    )
+    appointments = json.loads(output["body"])
+    appointment = appointments[0]
+
+    appointment["state"] = await get_appointment_state(appointment["appointment_id"])
+    return Appointment(**appointment)
 
 
 manager_router = APIRouter(
@@ -82,9 +99,16 @@ manager_router = APIRouter(
 @manager_router.get("/")
 async def manager_get_appointments() -> list:
     output = await call_step_function(
-        settings.GET_APPOINTMENTS_ARN
+        settings.GET_APPOINTMENTS_ARN,
+        {}
     )
-    return []
+    
+    appointments = json.loads(output["body"])
+
+    for appointment in appointments:
+        appointment["state"] = await get_appointment_state(appointment["appointment_id"])
+
+    return [Appointment(**item) for item in appointments]
 
 
 @manager_router.put("/{appointment_id}/finish")
@@ -93,7 +117,7 @@ async def finish_appointment(appointment_id: int) -> None:
         settings.UPDATE_APPOINTMENT_STATE_ARN,
         {
             "appointment_id": appointment_id,
-            "state": "Finished"
+            "new_state": "Finished"
         }
     )
     return None

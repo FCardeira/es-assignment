@@ -2,10 +2,19 @@
     import { Navbar, NavBrand, NavHamburger, NavUl, NavLi, Button, DarkMode } from 'flowbite-svelte';
     import { CalendarEditOutline } from 'flowbite-svelte-icons';
     import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 
     $: activeUrl = $page.url.pathname;
 
 	export let hideNewApponintmentButton = false;
+
+	function onClickLogout() {
+		if(browser) {
+			localStorage.removeItem('token');
+			location.href = '/login';
+		}
+	}
+
 </script>
 
 <Navbar fluid slot="header">
@@ -26,6 +35,6 @@
 	</div>
 	<NavUl {activeUrl} class="order-1 justify-end">
 		<NavLi href="/">Appointments</NavLi>
-		<NavLi href="/account">Account</NavLi>
+		<NavLi class="cursor-pointer" on:click={onClickLogout}>Logout</NavLi>
 	</NavUl>
 </Navbar>

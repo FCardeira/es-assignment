@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { Label, Input, Select } from 'flowbite-svelte';
     import type CreateAppointment from './CreateAppointment';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	// Array of physiotherapy specializations
 	let specializations = [
@@ -67,6 +70,14 @@
         doctor: '',
         speciality: ''
     };
+
+	$: {
+        if (!formData.date || !formData.doctor || !formData.speciality) {
+            dispatch('canContinue', false);
+        } else {
+			dispatch('canContinue', true);
+		}
+    }
 
 </script>
 

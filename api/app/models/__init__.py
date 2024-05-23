@@ -46,9 +46,15 @@ class AppointmentCreate(BaseModel):
     speciality: str
 
 class Appointment(BaseModel):
-    appointment_id: str
+    appointment_id: int
     doctor: str
     date: str
     time: str
     speciality: str
+    patient_username: str
     state: str | None = None
+
+class Slot(BaseModel):
+    date: str
+    time: str
+    doctor: str

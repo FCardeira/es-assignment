@@ -2,6 +2,14 @@
 	import { Button } from 'flowbite-svelte';
 	import type CreateAppointment from './CreateAppointment';
 	import { createEventDispatcher } from 'svelte';
+	import { onMount } from 'svelte';
+	import { getOccupiedTimeSlots, type Slot } from '../../../services/appointments';
+
+	onMount(async () => {
+		if(formData.date && formData.doctor) {
+			occupiedTimeSlots = await getOccupiedTimeSlots(formData.date.split('-').reverse().join('/'), formData.doctor);
+		}
+	})
 
 	export let formData: CreateAppointment;
 
@@ -13,7 +21,10 @@
 		return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
 	});
 
+	$: occupiedTimeSlots = [] as Slot[];
+
     $: isTimeSlotSelected = (timeSlot: string) => formData.time == timeSlot;
+	$: isTimeSlotOccupied = (timeSlot: string) => occupiedTimeSlots.find((slot) => slot.time === timeSlot);
 
     function toggleTimeSlot(timeSlot: string) {
         if (formData.time === timeSlot) {
@@ -39,9 +50,9 @@
 		<div class="grid grid-cols-4 gap-3">
 			{#each timeSlots as timeSlot}
 				{#if isTimeSlotSelected(timeSlot)}
-					<Button color="primary" pill on:click={() => toggleTimeSlot(timeSlot)}>{timeSlot}</Button>
+					<Button color="primary" pill on:click={() => toggleTimeSlot(timeSlot)} disabled={isTimeSlotOccupied(timeSlot)}>{timeSlot}</Button>
 				{:else}
-					<Button color="alternative" pill on:click={() => toggleTimeSlot(timeSlot)}>{timeSlot}</Button>
+					<Button color="alternative" pill on:click={() => toggleTimeSlot(timeSlot)} disabled={isTimeSlotOccupied(timeSlot)}>{timeSlot}</Button>
 				{/if}
 			{/each}
 		</div>

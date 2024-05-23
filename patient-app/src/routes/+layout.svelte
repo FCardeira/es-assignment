@@ -9,7 +9,7 @@
 
 	$: if (browser && isSignedIn() && $page.url.pathname === '/') {
 		goto('/appointments');
-	} else if (browser && !isSignedIn() && $page.url.pathname !== '/login' && $page.url.pathname !== '/register') {
+	} else if (browser && !isSignedIn() && $page.url.pathname !== '/login' && $page.url.pathname !== '/register' && $page.url.pathname !== '/management') {
 		goto('/login');
 	}
 

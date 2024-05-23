@@ -1,13 +1,39 @@
 <script lang="ts">
 	import AuthenticatedHeader from '../../../components/authenticatedHeader.svelte';
-	import { Button, StepIndicator } from 'flowbite-svelte';
-	import { ArrowRightOutline, ArrowLeftOutline } from 'flowbite-svelte-icons';
+	import { Button, StepIndicator, Spinner } from 'flowbite-svelte';
+	import { ArrowRightOutline } from 'flowbite-svelte-icons';
 	import Step1 from './step1.svelte';
 	import Step2 from './step2.svelte';
 	import Step3 from './step3.svelte';
 	import Step4 from './step4.svelte';
 	import type FormData from './CreateAppointment';
+	import { scheduleAppointment, getAppointment, payAppointment } from '../../../services/appointments';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { addAlert } from '../../../components/alerts/store';
 
+	onMount(async () => {
+		loadingStep = true;
+		const pay = $page.url.searchParams.get('pay');
+		if (pay) {
+			currentStep = 3;
+			currentAppointmentId = Number(pay);
+			$page.url.searchParams.delete('pay');
+			const appointment = await getAppointment(currentAppointmentId);
+			if (appointment) {
+				formData = {
+					date: appointment.date,
+					doctor: appointment.doctor,
+					speciality: appointment.speciality,
+					time: appointment.time
+				};
+			}
+		}
+		loadingStep = false;
+	})
+
+
+	let loadingStep = false;
 	let currentStep = 1;
 	let canContinue = true;
 	let steps = [
@@ -16,12 +42,41 @@
 		'Step 3 - Payment',
 		'Step 4 - Confirmation'
 	];
+	let currentAppointmentId: number = 0;
+	let loading = false;
 
 	// Date, Doctor, Specialization, Slot
 
-	function onClickNextStep(event: Event) {
+	async function onClickNextStep(event: Event) {
 		event.preventDefault();
-		currentStep++;
+		if (
+			currentStep == 2 &&
+			canContinue &&
+			formData.date &&
+			formData.doctor &&
+			formData.time &&
+			formData.speciality
+		) {
+			try {
+				loading = true;
+				const newAppointment = await scheduleAppointment({
+					doctor: formData.doctor,
+					date: formData.date,
+					time: formData.time,
+					speciality: formData.speciality
+				});
+				if (newAppointment) {
+					currentAppointmentId = newAppointment.appointment_id;
+				}
+				currentStep++;
+			} catch (error) {
+				console.error(error);
+			} finally {
+				loading = false;
+			}
+		} else {
+			currentStep++;
+		}
 	}
 
 	function onClickPreviousStep(event: Event) {
@@ -29,9 +84,23 @@
 		currentStep--;
 	}
 
-    function onGoToStep(event: CustomEvent<number>) {
-        currentStep = event.detail;
-    }
+	async function onGoToStep(event: CustomEvent<number>) {
+		if(event.detail === 4) {
+			try {
+				loadingStep = true;
+				await payAppointment(currentAppointmentId);
+				loadingStep = false;
+				currentStep = 4;
+			} catch (error) {
+				addAlert({
+					color: 'red',
+					message: 'Error paying appointment'
+				});
+			}
+		} else {
+			currentStep = event.detail;
+		}
+	}
 
 	$: stepComponent = (() => {
 		switch (currentStep) {
@@ -60,7 +129,7 @@
 
 	$: disableNextButton = !canContinue;
 	$: disablePreviousButton = currentStep === 1;
-    $: hideNavigationButtons = currentStep === 4 || currentStep === 3;
+	$: hideNavigationButtons = currentStep === 4 || currentStep === 3;
 </script>
 
 <AuthenticatedHeader hideNewApponintmentButton />
@@ -68,21 +137,29 @@
 	<div class="flex w-full justify-center px-20">
 		<StepIndicator class="grow" {currentStep} {steps} glow />
 	</div>
+	{#if loadingStep}
+		<Spinner />
+	{:else}
 	<svelte:component
 		this={stepComponent}
 		bind:formData
 		on:formchange={handleFormData}
 		on:canContinue={handleCanContinue}
-        on:goToStep={onGoToStep}
+		on:goToStep={onGoToStep}
 	/>
-    {#if !hideNavigationButtons}
-        <div class="flex space-x-3">
-            <Button outline on:click={onClickPreviousStep} disabled={disablePreviousButton}
+	{#if !hideNavigationButtons}
+		<div class="flex space-x-3">
+			<!--             <Button outline on:click={onClickPreviousStep} disabled={disablePreviousButton}
                 ><ArrowLeftOutline class="me-2 h-5 w-5" /> Back</Button
-            >
-            <Button on:click={onClickNextStep} disabled={disableNextButton}
-                >Next step <ArrowRightOutline class="ms-2 h-5 w-5" /></Button
-            >
-        </div>
-    {/if}
+            > -->
+			{#if loading}
+				<Button><Spinner class="me-3" size="4" color="white" />Loading ...</Button>
+			{:else}
+				<Button on:click={onClickNextStep} disabled={disableNextButton}
+					>Next step <ArrowRightOutline class="ms-2 h-5 w-5" /></Button
+				>
+			{/if}
+		</div>
+	{/if}
+	{/if}
 </div>
