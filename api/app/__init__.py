@@ -4,10 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-from app.requests import HTTP_POOL
-from app.logger import setup_logger
-from app.settings import settings
-from app import routes
+from requests import HTTP_POOL
+from logger import setup_logger
+from settings import settings
+import routes
 
 
 THREAD_POOL_WORKERS = 5

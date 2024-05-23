@@ -9,8 +9,8 @@ from fastapi.routing import APIRouter
 from pydantic import BaseModel
 from fastapi import status
 
-from app.settings import settings
-from app.models import DBUser
+from settings import settings
+from models import DBUser
 
 
 SECRET_KEY = "es_very_secret_key_2024"

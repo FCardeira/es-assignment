@@ -3,8 +3,8 @@ import json
 import asyncio
 from fastapi import HTTPException
 
-from app.settings import settings
-from app.models import DBUser
+from settings import settings
+from models import DBUser
 
 
 client = boto3.client(

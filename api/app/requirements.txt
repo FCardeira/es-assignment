@@ -2,3 +2,6 @@ uvicorn
 fastapi
 gunicorn
 pydantic
+pydantic-settings
+boto3
+python-jose

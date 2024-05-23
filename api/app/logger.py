@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from .settings import settings
+from settings import settings
 
 log = logging.getLogger(__name__)
 
@@ -34,11 +34,15 @@ class CustomFormatter(logging.Formatter):
 
 def setup_logger() -> None:
     log.debug("Setting up logger")
+    log_directory = f"logs"
+    # Create log directory if it does not exist
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
 
     # File handler
     file_formatter = logging.Formatter(LOGGER_FORMAT)
     file_handler = logging.FileHandler(
-        filename=f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/logs/app.log"
+        filename=f"{log_directory}/app.log"
     )
     file_handler.setFormatter(file_formatter)
     file_handler.setLevel(logging.INFO)

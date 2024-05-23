@@ -3,10 +3,10 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 import json
 
-from app.utils import call_step_function
-from app.models import AppointmentCreate, DBUser, Appointment, Slot
-from app.auth import get_current_user
-from app.settings import settings
+from utils import call_step_function
+from models import AppointmentCreate, DBUser, Appointment, Slot
+from auth import get_current_user
+from settings import settings
 
 
 router = APIRouter(

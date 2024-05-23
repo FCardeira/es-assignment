@@ -4,8 +4,8 @@ from json import loads, dumps
 from logging import getLogger
 from time import time
 
-from .exceptions import Error
-from .settings import settings
+from exceptions import Error
+from settings import settings
 
 log = getLogger(__name__)
 

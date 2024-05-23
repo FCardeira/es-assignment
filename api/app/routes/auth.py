@@ -1,10 +1,10 @@
 import boto3
 from fastapi import Depends
 from fastapi.routing import APIRouter
-from app.utils import call_step_function, get_user_dynamodb
-from app.settings import settings
-from app.models import UserRead, UserCreate, UserCreateResponse, LoginResponse, DBUser
-from app.auth import create_access_token, get_current_user
+from utils import call_step_function, get_user_dynamodb
+from settings import settings
+from models import UserRead, UserCreate, UserCreateResponse, LoginResponse, DBUser
+from auth import create_access_token, get_current_user
 
 
 router = APIRouter(
