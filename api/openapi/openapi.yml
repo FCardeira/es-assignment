@@ -1,12 +1,481 @@
-openapi: '3.0.2'
+openapi: 3.1.0
 info:
-  title: API Title
-  version: '0.1.0'
-servers:
-  - url: https://localhost:9001
+  title: XPTO Clinic API
+  version: 0.1.0
 paths:
-  /test:
+  /:
     get:
+      summary: Hello World
+      operationId: hello_world__get
       responses:
         '200':
-          description: OK
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: Response Hello World  Get
+  /-/health:
+    get:
+      summary: Healthcheck
+      description: Healthcheck endpoint.
+      operationId: healthcheck___health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /auth/register:
+    post:
+      tags:
+        - Authtentication
+      summary: Register User
+      operationId: register_user_auth_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/login:
+    post:
+      tags:
+        - Authtentication
+      summary: Login
+      operationId: login_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRead'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/me:
+    get:
+      tags:
+        - Authtentication
+      summary: Get User
+      operationId: get_user_auth_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateResponse'
+      security:
+        - OAuth2PasswordBearer: []
+  /appointments/user:
+    get:
+      tags:
+        - Appointments
+      summary: Get User Appointments
+      operationId: get_user_appointments_appointments_user_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items: {}
+                type: array
+                title: Response Get User Appointments Appointments User Get
+      security:
+        - OAuth2PasswordBearer: []
+  /appointments/{appointment_id}/state:
+    get:
+      tags:
+        - Appointments
+      summary: Get Appointment State
+      operationId: get_appointment_state_appointments__appointment_id__state_get
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Appointment Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: >-
+                  Response Get Appointment State Appointments  Appointment Id 
+                  State Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /appointments/:
+    post:
+      tags:
+        - Appointments
+      summary: Create Appointments
+      operationId: create_appointments_appointments__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /appointments/slots:
+    get:
+      tags:
+        - Appointments
+      summary: Get Occupied Slots
+      operationId: get_occupied_slots_appointments_slots_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Date
+        - name: doctor
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Doctor
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+                title: Response Get Occupied Slots Appointments Slots Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /appointments/{appointment_id}/pay:
+    put:
+      tags:
+        - Appointments
+      summary: Pay Appointment
+      operationId: pay_appointment_appointments__appointment_id__pay_put
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Appointment Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /appointments/{appointment_id}:
+    get:
+      tags:
+        - Appointments
+      summary: Get Appointment
+      operationId: get_appointment_appointments__appointment_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Appointment Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /manager/appointments/:
+    get:
+      tags:
+        - Manager Appointments
+      summary: Manager Get Appointments
+      operationId: manager_get_appointments_manager_appointments__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items: {}
+                type: array
+                title: Response Manager Get Appointments Manager Appointments  Get
+  /manager/appointments/{appointment_id}/finish:
+    put:
+      tags:
+        - Manager Appointments
+      summary: Finish Appointment
+      operationId: finish_appointment_manager_appointments__appointment_id__finish_put
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Appointment Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /appointments/{appointment_id}/payments/:
+    put:
+      tags:
+        - Payments
+      summary: Pay Appointment
+      operationId: pay_appointment_appointments__appointment_id__payments__put
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items: {}
+                type: array
+                title: >-
+                  Response Pay Appointment Appointments  Appointment Id 
+                  Payments  Put
+      security:
+        - OAuth2PasswordBearer: []
+components:
+  schemas:
+    Appointment:
+      properties:
+        appointment_id:
+          type: integer
+          title: Appointment Id
+        doctor:
+          type: string
+          title: Doctor
+        date:
+          type: string
+          title: Date
+        time:
+          type: string
+          title: Time
+        speciality:
+          type: string
+          title: Speciality
+        patient_username:
+          type: string
+          title: Patient Username
+        state:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: State
+      type: object
+      required:
+        - appointment_id
+        - doctor
+        - date
+        - time
+        - speciality
+        - patient_username
+      title: Appointment
+    AppointmentCreate:
+      properties:
+        doctor:
+          type: string
+          title: Doctor
+        date:
+          type: string
+          title: Date
+        time:
+          type: string
+          title: Time
+        speciality:
+          type: string
+          title: Speciality
+      type: object
+      required:
+        - doctor
+        - date
+        - time
+        - speciality
+      title: AppointmentCreate
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LoginResponse:
+      properties:
+        user:
+          $ref: '#/components/schemas/UserCreateResponse'
+        token:
+          type: string
+          title: Token
+        exp:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+          title: Exp
+      type: object
+      required:
+        - user
+        - token
+        - exp
+      title: LoginResponse
+    UserCreate:
+      properties:
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        email:
+          type: string
+          format: email
+          title: Email
+        phone_number:
+          type: string
+          title: Phone Number
+      type: object
+      required:
+        - username
+        - password
+        - email
+        - phone_number
+      title: UserCreate
+    UserCreateResponse:
+      properties:
+        username:
+          type: string
+          title: Username
+        email:
+          type: string
+          title: Email
+        phone_number:
+          type: string
+          title: Phone Number
+      type: object
+      required:
+        - username
+        - email
+        - phone_number
+      title: UserCreateResponse
+    UserRead:
+      properties:
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+        - username
+        - password
+      title: UserRead
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: token
