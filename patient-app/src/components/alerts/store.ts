@@ -26,11 +26,13 @@ export const addAlert = (alert: CreateAlert) => {
     timeout: 3000,
   };
 
+  const newAlert = { ...defaults, ...alert };
+
   // Push the alert to the top of the list of alerts
-  alerts.update((all) => [{ ...defaults, ...alert }, ...all]);
+  alerts.update((all) => [newAlert, ...all]);
 
   // If alert is dismissible, dismiss it after "timeout" amount of time.
-  if (alert.timeout) setTimeout(() => dismissAlert(id), alert.timeout);
+  if (newAlert.timeout) setTimeout(() => dismissAlert(id), newAlert.timeout);
 };
 
 export const dismissAlert = (id: number) => {
