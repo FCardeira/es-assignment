@@ -53,7 +53,7 @@ async def create_appointments(
         }
     )
 
-    return Appointment(appointment_id=str(output["appointment_id"]), doctor=output["doctor"], date=output["date"], time=output["time"], speciality=output["speciality"], state="Waiting for payment")
+    return Appointment(appointment_id=str(output["appointment_id"]), doctor=output["doctor"], date=output["date"], time=output["time"], speciality=output["speciality"], state="Waiting for payment", patient_username=user.username)
 
 @router.get("/slots")
 async def get_occupied_slots(date: str, doctor: str, user: DBUser = Depends(get_current_user)) -> list:
